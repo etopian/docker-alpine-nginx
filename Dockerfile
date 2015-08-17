@@ -1,19 +1,28 @@
-FROM alpine:3.1
+FROM alpine:edge
 
-MAINTAINER John Allen <john.allen@connexiolabs.com>
+MAINTAINER Etopian Inc. <contact@etopian.com>
 
-ENV NGINX_VERSION nginx-1.7.11
+ENV NGINX_VERSION nginx-1.9.3
 
 RUN apk --update add openssl-dev pcre-dev zlib-dev wget build-base && \
     mkdir -p /tmp/src && \
     cd /tmp/src && \
     wget http://nginx.org/download/${NGINX_VERSION}.tar.gz && \
+    wget https://raw.githubusercontent.com/masterzen/nginx-upload-progress-module/master/ngx_http_uploadprogress_module.c && \
+    git clone https://github.com/masterzen/nginx-upload-progress-module /tmp/nginx-upload-progress-module && \
     tar -zxvf ${NGINX_VERSION}.tar.gz && \
     cd /tmp/src/${NGINX_VERSION} && \
     ./configure \
         --with-http_ssl_module \
         --with-http_gzip_static_module \
+        --with-pcre \
+        --with-file-aio \
+        --with-http_flv_module \
+        --with-http_mp4_module \
+        --with-http_gunzip_module \
+        --add-module=/tmp/nginx-upload-progress-module \
         --prefix=/etc/nginx \
+        --with-http_gzip_static_module \
         --http-log-path=/var/log/nginx/access.log \
         --error-log-path=/var/log/nginx/error.log \
         --sbin-path=/usr/local/sbin/nginx && \
